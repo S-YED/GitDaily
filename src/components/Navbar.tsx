@@ -13,7 +13,7 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-2 group">
             <Github className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
             <span className="text-xl font-bold font-mono">
-              GitHub <span className="text-primary">Awesome</span>
+              Git<span className="text-primary">Daily</span>
             </span>
           </Link>
 

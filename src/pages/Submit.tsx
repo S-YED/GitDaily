@@ -32,7 +32,7 @@ const Submit = () => {
               Submit a <span className="text-primary">Project</span>
             </h1>
             <p className="text-muted-foreground">
-              Share an awesome open source project with the community
+              Share an awesome open source project for tomorrow's picks
             </p>
           </div>
 
@@ -102,6 +102,7 @@ const Submit = () => {
               <li>• Active development with recent commits preferred</li>
               <li>• Clear documentation and README required</li>
               <li>• Should solve a real problem or provide unique value</li>
+              <li>• Reviewed daily for inclusion in tomorrow's picks</li>
             </ul>
           </Card>
         </div>

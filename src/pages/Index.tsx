@@ -23,28 +23,28 @@ const Index = () => {
         <div className="container mx-auto text-center relative z-10 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
             <TrendingUp className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">This Week's Awesome Projects</span>
+            <span className="text-sm font-medium text-primary">Today's Top Picks</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold font-mono mb-6">
-            Discover <span className="text-primary">Trending</span>
+            Discover <span className="text-primary">Today's</span>
             <br />
-            Open Source Projects
+            Trending Open Source
           </h1>
           
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Curated weekly collections of the most innovative and useful GitHub repositories
+            Daily curated collections of the most innovative and useful GitHub repositories
             across AI, web development, DevOps, security, and more.
           </p>
 
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-primary" />
-              <span>Updated Weekly</span>
+              <span>Updated Daily</span>
             </div>
             <div className="flex items-center gap-2">
               <Github className="h-4 w-4 text-primary" />
-              <span>{sampleProjects.length}+ Projects</span>
+              <span>{sampleProjects.length}+ Projects Today</span>
             </div>
           </div>
         </div>
@@ -91,9 +91,9 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t border-border py-8 px-4 mt-20">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2025 GitHub Awesome. Open source community project.</p>
+          <p>© 2025 GitDaily. Open source community project.</p>
           <p className="mt-2">
-            Built with React, TypeScript, and Tailwind CSS • Data from GitHub API
+            Built with React, TypeScript, and Tailwind CSS • Updated daily with trending repos
           </p>
         </div>
       </footer>

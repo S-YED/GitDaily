@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import { Card } from "@/components/ui/card";
-import { Github, Youtube, Heart } from "lucide-react";
+import { Github, TrendingUp, Heart, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const About = () => {
@@ -11,10 +11,10 @@ const About = () => {
         <div className="space-y-12 animate-fade-in">
           <div className="text-center space-y-4">
             <h1 className="text-5xl font-bold font-mono">
-              About <span className="text-primary">GitHub Awesome</span>
+              About <span className="text-primary">GitDaily</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Curating the best trending open source projects, one week at a time
+              Curating the best trending open source projects, updated daily
             </p>
           </div>
 
@@ -26,8 +26,8 @@ const About = () => {
                   Our Mission
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  GitHub Awesome is a community-driven platform dedicated to discovering and showcasing
-                  the most innovative, useful, and trending open source projects from GitHub. Every week,
+                  GitDaily is a community-driven platform dedicated to discovering and showcasing
+                  the most innovative, useful, and trending open source projects from GitHub. Every day,
                   we curate a fresh collection of projects that deserve your attention—from cutting-edge
                   AI tools to powerful developer utilities.
                 </p>
@@ -35,13 +35,13 @@ const About = () => {
 
               <div>
                 <h2 className="text-2xl font-bold font-mono mb-4 flex items-center gap-2">
-                  <Youtube className="h-6 w-6 text-primary" />
-                  Inspired by the Community
+                  <TrendingUp className="h-6 w-6 text-primary" />
+                  Daily Discovery
                 </h2>
                 <p className="text-muted-foreground leading-relaxed">
-                  This platform was created in response to community demand from viewers of the GitHub
-                  Awesome YouTube channel. You asked for a centralized place to browse and explore these
-                  amazing projects—so we built it!
+                  This platform was created to help developers stay updated with the rapidly evolving
+                  open source ecosystem. With daily updates, you'll never miss trending repositories,
+                  breakthrough AI tools, or innovative developer utilities making waves on GitHub.
                 </p>
               </div>
 
@@ -50,7 +50,7 @@ const About = () => {
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-start gap-3">
                     <span className="text-primary font-bold">→</span>
-                    <span>Curate trending GitHub repositories weekly across various categories</span>
+                    <span>Curate trending GitHub repositories daily across various categories</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-primary font-bold">→</span>
@@ -62,7 +62,7 @@ const About = () => {
                   </li>
                   <li className="flex items-start gap-3">
                     <span className="text-primary font-bold">→</span>
-                    <span>Create an archive of past weeks for easy reference</span>
+                    <span>Create an archive of past days for easy reference</span>
                   </li>
                 </ul>
               </div>
@@ -74,7 +74,8 @@ const About = () => {
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-4">
                   This project itself is open source! We welcome contributions, suggestions, and feedback
-                  from the community. Help us make GitHub Awesome even better.
+                  from the community. Help us make GitDaily even better by submitting projects or
+                  contributing to the platform.
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <Button variant="default" className="bg-primary hover:bg-primary/90">
@@ -82,8 +83,8 @@ const About = () => {
                     Contribute on GitHub
                   </Button>
                   <Button variant="outline" className="hover:border-primary hover:text-primary">
-                    <Youtube className="h-4 w-4 mr-2" />
-                    Watch on YouTube
+                    <Send className="h-4 w-4 mr-2" />
+                    Submit Project
                   </Button>
                 </div>
               </div>
