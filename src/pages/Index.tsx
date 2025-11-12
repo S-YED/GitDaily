@@ -1,17 +1,15 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
-import ProjectCard from "@/components/ProjectCard";
+import ProjectCardEnhanced from "@/components/ProjectCardEnhanced";
 import FilterBar from "@/components/FilterBar";
-import { sampleProjects, categories } from "@/data/projects";
+import { categories } from "@/data/projects";
 import { Github, TrendingUp, Calendar } from "lucide-react";
+import { useProjects } from "@/hooks/useProjects";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("All");
-
-  const filteredProjects =
-    activeCategory === "All"
-      ? sampleProjects
-      : sampleProjects.filter((project) => project.category === activeCategory);
+  const { projects, loading, toggleFavorite } = useProjects(activeCategory);
 
   return (
     <div className="min-h-screen bg-background">
@@ -44,7 +42,7 @@ const Index = () => {
             </div>
             <div className="flex items-center gap-2">
               <Github className="h-4 w-4 text-primary" />
-              <span>{sampleProjects.length}+ Projects Today</span>
+              <span>{projects.length}+ Projects Today</span>
             </div>
           </div>
         </div>
@@ -66,24 +64,34 @@ const Index = () => {
           </div>
 
           {/* Projects Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-            {filteredProjects.map((project, index) => (
-              <div
-                key={project.id}
-                style={{ animationDelay: `${index * 50}ms` }}
-                className="animate-slide-up"
-              >
-                <ProjectCard {...project} />
-              </div>
-            ))}
-          </div>
-
-          {filteredProjects.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground text-lg">
-                No projects found in this category yet. Check back soon!
-              </p>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Skeleton key={i} className="h-80" />
+              ))}
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+                {projects.map((project, index) => (
+                  <div
+                    key={project.id}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                    className="animate-slide-up"
+                  >
+                    <ProjectCardEnhanced {...project} onToggleFavorite={toggleFavorite} />
+                  </div>
+                ))}
+              </div>
+
+              {projects.length === 0 && (
+                <div className="text-center py-12">
+                  <p className="text-muted-foreground text-lg">
+                    No projects found in this category yet. Check back soon!
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

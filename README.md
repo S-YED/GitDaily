@@ -1,73 +1,172 @@
-# Welcome to your Lovable project
+# GitDaily 🚀
 
-## Project info
+> Discover today's trending open-source projects, curated daily
 
-**URL**: https://lovable.dev/projects/79c2b9a1-beb2-4509-8ede-9d76851d0efe
+GitDaily is a modern web platform that showcases trending GitHub repositories with daily updates, AI-powered summaries, and community curation.
 
-## How can I edit this code?
+## ✨ Features
 
-There are several ways of editing your application.
+### Phase 1 (MVP) ✅
+- **Daily Trending Feed**: Automatically updated list of trending repositories
+- **Smart Categorization**: Filter by AI, WebDev, DevOps, Mobile, and more
+- **GitHub Integration**: Live stats (stars, forks, language)
+- **Responsive Design**: Beautiful UI with dark mode
 
-**Use Lovable**
+### Phase 2 (Current) ✅
+- **User Authentication**: Sign up and sign in with email
+- **Favorites System**: Save projects you love
+- **Community Submissions**: Suggest projects for featuring
+- **User Profiles**: Track your activity, streaks, and badges
+- **AI Summaries**: (Coming soon) Understand projects at a glance
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/79c2b9a1-beb2-4509-8ede-9d76851d0efe) and start prompting.
+### Phase 3 (In Progress) 🚧
+- **Personalized Recommendations**: AI-powered project suggestions
+- **Analytics Dashboard**: Weekly insights and trends
+- **Gamification**: Badges, streaks, and leaderboards
+- **Audio Recaps**: Daily audio summaries of top projects
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🛠️ Tech Stack
 
-**Use your preferred IDE**
+- **Frontend**: React 18 + TypeScript + Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Backend**: Lovable Cloud (Supabase)
+- **Database**: PostgreSQL with Row Level Security
+- **Authentication**: Supabase Auth
+- **Automation**: GitHub Actions (daily cron jobs)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 🚀 Getting Started
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Prerequisites
 
-Follow these steps:
+- Node.js 18+ and npm
+- A Lovable account (for backend)
+- GitHub account (for automation)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Installation
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd gitdaily
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+3. **Run development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Open in browser**
+   Navigate to `http://localhost:5173`
+
+## 📦 Project Structure
+
+```
+gitdaily/
+├── .github/
+│   └── workflows/
+│       └── daily-fetch.yml      # Daily automation
+├── scripts/
+│   └── fetch-trending.js        # GitHub trending fetcher
+├── src/
+│   ├── components/              # React components
+│   ├── hooks/                   # Custom hooks
+│   ├── pages/                   # Page components
+│   └── integrations/           # Backend integration
+└── README.md
 ```
 
-**Edit a file directly in GitHub**
+## 🤖 Automation
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+GitDaily uses GitHub Actions to automatically fetch trending repositories daily:
 
-**Use GitHub Codespaces**
+1. **Daily Cron Job**: Runs at 6 AM UTC every day
+2. **Fetches GitHub Trending**: Top 30 repositories
+3. **Categorizes Automatically**: Based on topics and language
+4. **Stores in Database**: Via Supabase REST API
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### Setting Up Automation
 
-## What technologies are used for this project?
+To enable daily automation, add these secrets to your GitHub repository:
 
-This project is built with:
+1. Go to **Settings** → **Secrets and variables** → **Actions**
+2. Add the following secrets:
+   - `SUPABASE_URL`: Your Supabase project URL
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
+   - `GITHUB_TOKEN`: (Automatically provided by GitHub Actions)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎯 Usage
 
-## How can I deploy this project?
+### For Visitors
+- Browse daily trending projects
+- Filter by category
+- View project details and statistics
+- Sign up to favorite projects
 
-Simply open [Lovable](https://lovable.dev/projects/79c2b9a1-beb2-4509-8ede-9d76851d0efe) and click on Share -> Publish.
+### For Contributors
+- Sign in with email
+- Submit project suggestions
+- Build your profile with badges
+- Track your activity streaks
 
-## Can I connect a custom domain to my Lovable project?
+### For Admins
+- Review community submissions
+- Manage featured projects
+- Monitor platform health
 
-Yes, you can!
+## 🔒 Security
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Row Level Security (RLS) on all database tables
+- Separate user roles table (admin, moderator, user)
+- Secure authentication with Supabase Auth
+- API keys stored as GitHub Secrets
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🤝 Contributing
+
+We welcome contributions! Here's how:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Contribution Guidelines
+
+- Follow the existing code style
+- Write meaningful commit messages
+- Add tests for new features
+- Update documentation as needed
+
+## 📝 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🌟 Roadmap
+
+- [x] Phase 1: MVP with daily trending
+- [x] Phase 2: Auth, favorites, submissions
+- [ ] Phase 3: Personalization & analytics
+- [ ] AI-powered summaries
+- [ ] Audio recaps
+- [ ] Multi-source discovery (GitLab, HuggingFace)
+- [ ] Mobile app
+
+## 💬 Community
+
+- [GitHub Discussions](https://github.com/gitdaily/gitdaily/discussions)
+- [Discord](https://discord.gg/gitdaily) (Coming soon)
+
+## 🙏 Acknowledgments
+
+- Inspired by GitHub Trending and Product Hunt
+- Built with [Lovable](https://lovable.dev)
+- UI components from [shadcn/ui](https://ui.shadcn.com)
+
+---
+
+**Made with ❤️ by the open-source community**

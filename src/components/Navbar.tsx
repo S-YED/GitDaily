@@ -1,10 +1,20 @@
 import { Link } from "react-router-dom";
-import { Github, Menu, X } from "lucide-react";
+import { Github, Menu, X, User as UserIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -28,10 +38,41 @@ const Navbar = () => {
             <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
               About
             </Link>
-            <Button variant="default" size="sm" className="bg-primary hover:bg-primary/90">
-              <Github className="h-4 w-4 mr-2" />
-              Star on GitHub
-            </Button>
+            
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                    <Avatar className="h-9 w-9 border border-primary/20">
+                      <AvatarImage src="" />
+                      <AvatarFallback className="bg-primary/10 text-primary">
+                        {user.email?.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="cursor-pointer">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button asChild variant="default" size="sm" className="bg-primary hover:bg-primary/90">
+                <Link to="/auth">
+                  <UserIcon className="h-4 w-4 mr-2" />
+                  Sign In
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -69,10 +110,37 @@ const Navbar = () => {
             >
               About
             </Link>
-            <Button variant="default" size="sm" className="w-full bg-primary hover:bg-primary/90">
-              <Github className="h-4 w-4 mr-2" />
-              Star on GitHub
-            </Button>
+            
+            {user ? (
+              <>
+                <Link
+                  to="/profile"
+                  className="block text-sm font-medium hover:text-primary transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  Profile
+                </Link>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full"
+                  onClick={() => {
+                    signOut();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <Button asChild variant="default" size="sm" className="w-full bg-primary hover:bg-primary/90">
+                <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                  <UserIcon className="h-4 w-4 mr-2" />
+                  Sign In
+                </Link>
+              </Button>
+            )}
           </div>
         )}
       </div>
