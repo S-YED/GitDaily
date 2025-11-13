@@ -33,38 +33,38 @@ const Navbar = () => {
   }, [user]);
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 glass-strong border-b border-border/50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <Github className="h-8 w-8 text-primary transition-transform group-hover:scale-110" />
-            <span className="text-xl font-bold font-mono">
-              Git<span className="text-primary">Daily</span>
+          <Link to="/" className="flex items-center gap-3 group">
+            <Github className="h-8 w-8 text-primary transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
+            <span className="text-xl font-bold font-mono tracking-tight">
+              Git<span className="gradient-text">Daily</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
+          <div className="hidden md:flex items-center gap-8">
+            <Link to="/" className="text-sm font-semibold hover:text-primary transition-all duration-300 hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
               Home
             </Link>
-            <Link to="/submit" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link to="/submit" className="text-sm font-semibold hover:text-primary transition-all duration-300 hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
               Submit Project
             </Link>
-            <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link to="/about" className="text-sm font-semibold hover:text-primary transition-all duration-300 hover:scale-105 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300 hover:after:w-full">
               About
             </Link>
             
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
-                    <Avatar className="h-9 w-9 border border-primary/20">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:scale-110 transition-transform duration-200">
+                    <Avatar className="h-10 w-10 border-2 border-primary/30 shadow-glow">
                       <AvatarImage 
                         src={profile?.avatar_url || user.user_metadata?.avatar_url || ''} 
                         alt={profile?.username || user.email}
                       />
-                      <AvatarFallback className="bg-primary/10 text-primary">
+                      <AvatarFallback className="glass-strong text-primary font-bold">
                         {profile?.username?.slice(0, 2).toUpperCase() || user.email?.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -85,7 +85,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="default" size="sm" className="bg-primary hover:bg-primary/90">
+              <Button asChild variant="default" size="sm" className="glass-strong shadow-glow hover:shadow-glow-strong hover:scale-105 transition-all duration-300 font-semibold">
                 <Link to="/auth">
                   <UserIcon className="h-4 w-4 mr-2" />
                   Sign In

@@ -19,6 +19,7 @@ All colors MUST be HSL.
 
     --primary: 142 76% 36%;
     --primary-foreground: 220 17% 7%;
+    --primary-glow: 142 76% 45%;
 
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
@@ -28,6 +29,7 @@ All colors MUST be HSL.
 
     --accent: 188 95% 52%;
     --accent-foreground: 220 17% 7%;
+    --accent-glow: 188 95% 60%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
@@ -47,10 +49,28 @@ All colors MUST be HSL.
     --sidebar-border: 217 33% 17%;
     --sidebar-ring: 142 76% 36%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(142 76% 36% / 0.1), hsl(188 95% 52% / 0.1));
-    --gradient-card: linear-gradient(135deg, hsl(220 17% 12%), hsl(220 17% 10%));
-    --shadow-glow: 0 0 30px hsl(142 76% 36% / 0.15);
-    --shadow-card: 0 4px 20px hsl(220 17% 5% / 0.4);
+    /* Enhanced Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(142 76% 36% / 0.15), hsl(188 95% 52% / 0.15));
+    --gradient-mesh: radial-gradient(at 40% 20%, hsl(142 76% 36% / 0.3) 0px, transparent 50%),
+                      radial-gradient(at 80% 0%, hsl(188 95% 52% / 0.25) 0px, transparent 50%),
+                      radial-gradient(at 0% 50%, hsl(142 76% 36% / 0.2) 0px, transparent 50%);
+    --gradient-card: linear-gradient(135deg, hsl(220 17% 12% / 0.95), hsl(220 17% 10% / 0.95));
+    --gradient-card-hover: linear-gradient(135deg, hsl(220 17% 15% / 0.95), hsl(220 17% 12% / 0.95));
+    
+    /* Enhanced Shadows */
+    --shadow-glow: 0 0 40px hsl(142 76% 36% / 0.2);
+    --shadow-glow-strong: 0 0 60px hsl(142 76% 36% / 0.3);
+    --shadow-card: 0 8px 32px hsl(220 17% 5% / 0.5);
+    --shadow-card-hover: 0 12px 48px hsl(220 17% 5% / 0.6);
+    --shadow-elevated: 0 20px 60px hsl(220 17% 5% / 0.7);
+    
+    /* Glass Effects */
+    --glass-bg: hsl(220 17% 12% / 0.7);
+    --glass-border: hsl(210 40% 98% / 0.1);
+    
+    /* Animation Easings */
+    --ease-spring: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -61,9 +81,94 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    background-image: var(--gradient-mesh);
+    background-attachment: fixed;
   }
   
   h1, h2, h3, h4, h5, h6 {
     @apply font-mono;
+  }
+}
+
+@layer utilities {
+  /* Glass morphism */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+  }
+  
+  .glass-strong {
+    background: hsl(220 17% 15% / 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid hsl(210 40% 98% / 0.15);
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent;
+    background-size: 200% auto;
+    animation: gradient-shift 3s ease infinite;
+  }
+  
+  /* Enhanced hover effects */
+  .hover-lift {
+    transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsl(210 40% 98% / 0.05) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+  
+  /* Pulse glow */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Text shadow for emphasis */
+  .text-glow {
+    text-shadow: 0 0 20px hsl(142 76% 36% / 0.5);
+  }
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% center;
+  }
+  50% {
+    background-position: 100% center;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(142 76% 36% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(142 76% 36% / 0.6);
   }
 }

@@ -8,7 +8,7 @@ interface FilterBarProps {
 
 const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarProps) => {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap justify-center gap-3">
       {categories.map((category) => (
         <Button
           key={category}
@@ -17,8 +17,8 @@ const FilterBar = ({ categories, activeCategory, onCategoryChange }: FilterBarPr
           onClick={() => onCategoryChange(category)}
           className={
             activeCategory === category
-              ? "bg-primary text-primary-foreground"
-              : "hover:border-primary hover:text-primary"
+              ? "glass-strong shadow-glow font-semibold transition-all duration-300 scale-105"
+              : "glass hover:glass-strong hover:scale-105 hover:shadow-glow transition-all duration-300"
           }
         >
           {category}
