@@ -27,6 +27,14 @@ export const useProjects = (category: string = 'All') => {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
+  // Initialize with sample data immediately
+  useEffect(() => {
+    const filteredSamples = category === 'All' 
+      ? sampleProjects 
+      : sampleProjects.filter(p => p.category === category);
+    setProjects(filteredSamples);
+  }, [category]);
+
   // Sample data as fallback
   const sampleProjects: Project[] = [
     {
@@ -215,6 +223,11 @@ export const useProjects = (category: string = 'All') => {
     setLoading(true);
     setError(null);
     
+    // Always start with sample data as fallback
+    const filteredSamples = category === 'All' 
+      ? sampleProjects 
+      : sampleProjects.filter(p => p.category === category);
+    
     try {
       let query = supabase
         .from('projects')
@@ -228,14 +241,10 @@ export const useProjects = (category: string = 'All') => {
 
       const { data, error } = await query;
 
-      if (error) {
-        console.error('Supabase error:', error);
-        // Use sample data as fallback
-        const filteredSamples = category === 'All' 
-          ? sampleProjects 
-          : sampleProjects.filter(p => p.category === category);
+      if (error || !data || data.length === 0) {
+        console.log('Using sample data as fallback');
         setProjects(filteredSamples);
-      } else if (data) {
+      } else {
         // If user is logged in, check which projects are favorited
         if (user) {
           const { data: favorites } = await supabase
@@ -254,19 +263,9 @@ export const useProjects = (category: string = 'All') => {
         } else {
           setProjects(data);
         }
-      } else {
-        // No data from database, use sample data
-        const filteredSamples = category === 'All' 
-          ? sampleProjects 
-          : sampleProjects.filter(p => p.category === category);
-        setProjects(filteredSamples);
       }
     } catch (err) {
-      console.error('Network error:', err);
-      // Use sample data as fallback
-      const filteredSamples = category === 'All' 
-        ? sampleProjects 
-        : sampleProjects.filter(p => p.category === category);
+      console.log('Network error, using sample data:', err);
       setProjects(filteredSamples);
     }
     
