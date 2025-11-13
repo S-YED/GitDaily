@@ -30,14 +30,17 @@ const ProjectCardEnhanced = ({
   };
 
   return (
-    <Card className="group h-full bg-gradient-card border-border hover:border-primary/50 transition-all duration-300 hover:shadow-glow">
-      <CardHeader className="space-y-2">
-        <div className="flex items-start justify-between gap-2">
+    <Card className="group h-full glass hover:glass-strong border-border/50 hover:border-primary/50 transition-all duration-500 hover-lift overflow-hidden relative">
+      {/* Shimmer effect on hover */}
+      <div className="absolute inset-0 shimmer opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+      
+      <CardHeader className="space-y-3 relative z-10">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <CardTitle className="text-lg font-mono group-hover:text-primary transition-colors line-clamp-1">
+            <CardTitle className="text-lg font-mono group-hover:text-primary transition-all duration-300 line-clamp-1 group-hover:scale-105 transform origin-left">
               {repo_name}
             </CardTitle>
-            <CardDescription className="line-clamp-2 mt-2">
+            <CardDescription className="line-clamp-2 mt-2 text-sm">
               {description || 'No description available'}
             </CardDescription>
           </div>
@@ -46,12 +49,12 @@ const ProjectCardEnhanced = ({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 shrink-0"
+              className="h-9 w-9 shrink-0 hover:scale-110 transition-transform duration-200"
               onClick={() => onToggleFavorite(id)}
             >
               <Heart
-                className={`h-4 w-4 transition-colors ${
-                  is_favorited ? 'fill-primary text-primary' : 'text-muted-foreground'
+                className={`h-5 w-5 transition-all duration-300 ${
+                  is_favorited ? 'fill-primary text-primary scale-110' : 'text-muted-foreground hover:text-primary'
                 }`}
               />
             </Button>
@@ -59,39 +62,39 @@ const ProjectCardEnhanced = ({
         </div>
 
         {ai_summary && (
-          <div className="text-sm text-muted-foreground bg-secondary/30 p-3 rounded-md border border-border/50">
-            <span className="text-xs text-primary font-semibold">AI Summary:</span>
-            <p className="mt-1">{ai_summary}</p>
+          <div className="text-sm text-muted-foreground glass p-4 rounded-lg border border-primary/20 backdrop-blur-sm">
+            <span className="text-xs text-primary font-bold uppercase tracking-wide">✨ AI Summary</span>
+            <p className="mt-2 leading-relaxed">{ai_summary}</p>
           </div>
         )}
 
         {why_trending && (
-          <div className="flex items-start gap-2 text-xs bg-accent/10 p-2 rounded-md border border-accent/20">
-            <span className="text-accent font-semibold">🔥</span>
-            <span className="text-accent-foreground">{why_trending}</span>
+          <div className="flex items-start gap-3 text-sm glass-strong p-3 rounded-lg border border-accent/30">
+            <span className="text-2xl animate-pulse">🔥</span>
+            <span className="text-accent-foreground leading-relaxed">{why_trending}</span>
           </div>
         )}
       </CardHeader>
 
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <div className="flex items-center gap-1">
+      <CardContent className="space-y-4 relative z-10">
+        <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-2 glass px-3 py-1.5 rounded-full">
             <Star className="h-4 w-4 text-primary" />
-            <span className="font-medium">{formatNumber(stars)}</span>
+            <span className="font-semibold">{formatNumber(stars)}</span>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2 glass px-3 py-1.5 rounded-full">
             <GitFork className="h-4 w-4 text-primary" />
-            <span className="font-medium">{formatNumber(forks)}</span>
+            <span className="font-semibold">{formatNumber(forks)}</span>
           </div>
           {language && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs glass">
               {language}
             </Badge>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-2">
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center justify-between gap-3 pt-2">
+          <Badge variant="outline" className="text-xs glass font-medium">
             {category}
           </Badge>
           
@@ -99,10 +102,10 @@ const ProjectCardEnhanced = ({
             asChild
             size="sm"
             variant="default"
-            className="bg-primary hover:bg-primary/90"
+            className="bg-primary hover:bg-primary-glow shadow-glow hover:shadow-glow-strong transition-all duration-300 font-semibold group/btn"
           >
-            <a href={repo_url} target="_blank" rel="noopener noreferrer">
-              <ExternalLink className="h-4 w-4 mr-2" />
+            <a href={repo_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <ExternalLink className="h-4 w-4 group-hover/btn:rotate-12 transition-transform duration-200" />
               View Repo
             </a>
           </Button>

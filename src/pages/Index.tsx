@@ -16,45 +16,50 @@ const Index = () => {
       <Navbar />
       
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-hero overflow-hidden">
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <section className="relative py-32 px-4 overflow-hidden">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-float"></div>
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-float" style={{ animationDelay: '1s' }}></div>
+        </div>
+        
         <div className="container mx-auto text-center relative z-10 animate-fade-in">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 border border-primary/20 rounded-full mb-6">
-            <TrendingUp className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-primary">Today's Top Picks</span>
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 glass rounded-full mb-8 hover-lift">
+            <TrendingUp className="h-4 w-4 text-primary animate-pulse" />
+            <span className="text-sm font-semibold gradient-text">Today's Top Picks</span>
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold font-mono mb-6">
-            Discover <span className="text-primary">Today's</span>
+          <h1 className="text-6xl md:text-8xl font-bold font-mono mb-8 leading-tight">
+            Discover <span className="gradient-text">Today's</span>
             <br />
-            Trending Open Source
+            <span className="text-glow">Trending Open Source</span>
           </h1>
           
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+          <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-12 leading-relaxed">
             Daily curated collections of the most innovative and useful GitHub repositories
             across AI, web development, DevOps, security, and more.
           </p>
 
-          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-center gap-8 text-sm">
+            <div className="glass px-6 py-3 rounded-full flex items-center gap-2 hover-lift">
               <Calendar className="h-4 w-4 text-primary" />
-              <span>Updated Daily</span>
+              <span className="font-medium">Updated Daily</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="glass px-6 py-3 rounded-full flex items-center gap-2 hover-lift">
               <Github className="h-4 w-4 text-primary" />
-              <span>{projects.length}+ Projects Today</span>
+              <span className="font-medium">{projects.length}+ Projects</span>
             </div>
           </div>
         </div>
       </section>
 
       {/* Projects Section */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="space-y-8">
+      <section className="container mx-auto px-4 py-16">
+        <div className="space-y-10">
           {/* Filter Bar */}
           <div className="animate-slide-up">
-            <h2 className="text-2xl font-bold font-mono mb-4">
-              Browse by <span className="text-primary">Category</span>
+            <h2 className="text-3xl md:text-4xl font-bold font-mono mb-6 text-center">
+              Browse by <span className="gradient-text">Category</span>
             </h2>
             <FilterBar
               categories={categories}
