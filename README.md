@@ -2,52 +2,54 @@
 
 > Discover today's trending open-source projects, curated daily
 
-GitDaily is a modern web platform that showcases trending GitHub repositories with daily updates, AI-powered summaries, and community curation.
+GitDaily is a modern web platform that showcases trending GitHub repositories with daily updates, smart categorization, and community curation. Built for developers who want to stay updated with the latest and most innovative open-source projects.
 
 ## ✨ Features
 
-### Phase 1 (MVP) ✅
+### Core Features ✅
 - **Daily Trending Feed**: Automatically updated list of trending repositories
-- **Smart Categorization**: Filter by AI, WebDev, DevOps, Mobile, and more
-- **GitHub Integration**: Live stats (stars, forks, language)
-- **Responsive Design**: Beautiful UI with dark mode
-
-### Phase 2 (Current) ✅
-- **User Authentication**: Sign up and sign in with email
-- **Favorites System**: Save projects you love
+- **Smart Categorization**: Filter by AI, WebDev, DevOps, Mobile, Data, Security, Tools, Gaming
+- **GitHub Integration**: Live stats (stars, forks, language, topics)
+- **Responsive Design**: Beautiful UI with dark mode support
+- **User Authentication**: Secure sign up and sign in with Supabase Auth
+- **Favorites System**: Save and organize projects you love
 - **Community Submissions**: Suggest projects for featuring
-- **User Profiles**: Track your activity, streaks, and badges
-- **AI Summaries**: (Coming soon) Understand projects at a glance
+- **User Profiles**: Track activity, streaks, and earn badges
+- **Real-time Updates**: Fresh content delivered daily via automation
 
-### Phase 3 (In Progress) 🚧
+### Coming Soon 🚧
+- **AI Summaries**: Understand projects at a glance
 - **Personalized Recommendations**: AI-powered project suggestions
 - **Analytics Dashboard**: Weekly insights and trends
-- **Gamification**: Badges, streaks, and leaderboards
+- **Enhanced Gamification**: Advanced badges and leaderboards
 - **Audio Recaps**: Daily audio summaries of top projects
+- **Multi-source Discovery**: GitLab, HuggingFace integration
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Backend**: Lovable Cloud (Supabase)
-- **Database**: PostgreSQL with Row Level Security
-- **Authentication**: Supabase Auth
+- **Styling**: Tailwind CSS + shadcn/ui components
+- **Backend**: Supabase (PostgreSQL + Auth + Real-time)
+- **Database**: PostgreSQL with Row Level Security (RLS)
+- **Authentication**: Supabase Auth with email/password
 - **Automation**: GitHub Actions (daily cron jobs)
+- **Deployment**: Vercel/Netlify compatible
+- **State Management**: TanStack Query + React Context
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ and npm
-- A Lovable account (for backend)
-- GitHub account (for automation)
+- **Node.js 18+** and npm
+- **Supabase account** (free tier available)
+- **GitHub account** (for automation)
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
-   cd gitdaily
+   git clone https://github.com/S-YED/awesome-hub-feed.git
+   cd awesome-hub-feed
    ```
 
 2. **Install dependencies**
@@ -55,29 +57,62 @@ GitDaily is a modern web platform that showcases trending GitHub repositories wi
    npm install
    ```
 
-3. **Run development server**
+3. **Set up Supabase**
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Copy your project URL and anon key
+   - Run the SQL migration from `supabase/migrations/` in your Supabase SQL editor
+
+4. **Configure environment variables**
+   ```bash
+   # Create .env file
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_PUBLISHABLE_KEY=your_supabase_anon_key
+   VITE_SUPABASE_PROJECT_ID=your_project_id
+   ```
+
+5. **Run development server**
    ```bash
    npm run dev
    ```
 
-4. **Open in browser**
+6. **Open in browser**
    Navigate to `http://localhost:5173`
 
 ## 📦 Project Structure
 
 ```
-gitdaily/
+awesome-hub-feed/
 ├── .github/
-│   └── workflows/
-│       └── daily-fetch.yml      # Daily automation
+│   ├── workflows/
+│   │   └── daily-fetch.yml      # Daily automation workflow
+│   └── ISSUE_TEMPLATE/          # GitHub issue templates
 ├── scripts/
-│   └── fetch-trending.js        # GitHub trending fetcher
+│   └── fetch-trending.js        # GitHub trending fetcher script
 ├── src/
 │   ├── components/              # React components
-│   ├── hooks/                   # Custom hooks
-│   ├── pages/                   # Page components
-│   └── integrations/           # Backend integration
-└── README.md
+│   │   ├── ui/                  # shadcn/ui components
+│   │   ├── FilterBar.tsx        # Category filtering
+│   │   ├── Navbar.tsx           # Navigation component
+│   │   ├── ProjectCard.tsx      # Project display cards
+│   │   └── ...
+│   ├── hooks/                   # Custom React hooks
+│   │   ├── useAuth.tsx          # Authentication logic
+│   │   ├── useProjects.tsx      # Project data management
+│   │   └── ...
+│   ├── pages/                   # Route components
+│   │   ├── Index.tsx            # Home page
+│   │   ├── Auth.tsx             # Login/signup
+│   │   ├── Profile.tsx          # User profile
+│   │   ├── Submit.tsx           # Project submission
+│   │   └── ...
+│   ├── integrations/
+│   │   └── supabase/            # Supabase client & types
+│   ├── lib/                     # Utility functions
+│   └── data/                    # Static data & constants
+├── supabase/
+│   └── migrations/              # Database schema
+├── public/                      # Static assets
+└── configuration files          # Vite, Tailwind, TypeScript configs
 ```
 
 ## 🤖 Automation
@@ -91,13 +126,24 @@ GitDaily uses GitHub Actions to automatically fetch trending repositories daily:
 
 ### Setting Up Automation
 
-To enable daily automation, add these secrets to your GitHub repository:
+To enable daily automation, configure GitHub repository secrets:
 
-1. Go to **Settings** → **Secrets and variables** → **Actions**
-2. Add the following secrets:
+1. **Navigate to Repository Settings**
+   - Go to **Settings** → **Secrets and variables** → **Actions**
+
+2. **Add Required Secrets**
    - `SUPABASE_URL`: Your Supabase project URL
-   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key
-   - `GITHUB_TOKEN`: (Automatically provided by GitHub Actions)
+   - `SUPABASE_SERVICE_ROLE_KEY`: Your Supabase service role key (not anon key)
+   - `GITHUB_TOKEN`: Automatically provided by GitHub Actions
+
+3. **Test the Workflow**
+   - Go to **Actions** tab in your repository
+   - Find "Daily Trending Fetch" workflow
+   - Click **Run workflow** to test manually
+
+4. **Verify Data Population**
+   - Check your Supabase dashboard → Table Editor → `projects` table
+   - Should contain ~30 trending repositories after successful run
 
 ## 🎯 Usage
 
@@ -156,10 +202,36 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [ ] Multi-source discovery (GitLab, HuggingFace)
 - [ ] Mobile app
 
-## 💬 Community
+## 🔧 Development
 
-- [GitHub Discussions](https://github.com/gitdaily/gitdaily/discussions)
-- [Discord](https://discord.gg/gitdaily) (Coming soon)
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+### Database Schema
+
+The project uses PostgreSQL with the following main tables:
+- `projects` - Trending repositories data
+- `profiles` - User profiles and settings
+- `favorites` - User's favorited projects
+- `submissions` - Community project submissions
+- `badges` - Gamification badges
+- `user_badges` - User badge assignments
+
+### API Integration
+
+- **GitHub API**: Fetches trending repositories
+- **Supabase API**: Handles authentication, data storage, and real-time updates
+- **Row Level Security**: Ensures data privacy and security
+
+## 💬 Community & Support
+
+- **Issues**: [GitHub Issues](https://github.com/S-YED/awesome-hub-feed/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/S-YED/awesome-hub-feed/discussions)
+- **Feature Requests**: Use the issue templates provided
 
 ## 💖 Support GitDaily
 
@@ -176,10 +248,24 @@ Your support helps keep GitDaily running and free for everyone!
 
 ## 🙏 Acknowledgments
 
-- Inspired by GitHub Trending and Product Hunt
-- Built with modern web technologies
-- UI components from [shadcn/ui](https://ui.shadcn.com)
+- **Inspiration**: GitHub Trending, Product Hunt, and Hacker News
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com) for beautiful, accessible components
+- **Icons**: [Lucide React](https://lucide.dev) for consistent iconography
+- **Backend**: [Supabase](https://supabase.com) for powerful backend-as-a-service
+- **Deployment**: Compatible with Vercel, Netlify, and other modern platforms
+
+## 📊 Project Stats
+
+- **Language**: TypeScript
+- **Framework**: React 18 with Vite
+- **Database**: PostgreSQL (via Supabase)
+- **Styling**: Tailwind CSS
+- **Authentication**: Supabase Auth
+- **Automation**: GitHub Actions
+- **License**: MIT
 
 ---
 
 **Made with ❤️ by [Syed Khaja Moinuddin](https://github.com/S-YED) for the developer community**
+
+*GitDaily helps developers discover amazing open-source projects daily. Star the repo if you find it useful!*
