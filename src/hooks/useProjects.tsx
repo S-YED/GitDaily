@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
-import { useBadges } from './useBadges';
 import { toast } from 'sonner';
 
 export interface Project {
@@ -22,20 +21,9 @@ export interface Project {
 }
 
 export const useProjects = (category: string = 'All') => {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // Initialize with sample data immediately
-  useEffect(() => {
-    const filteredSamples = category === 'All' 
-      ? sampleProjects 
-      : sampleProjects.filter(p => p.category === category);
-    setProjects(filteredSamples);
-  }, [category]);
-
-  // Sample data as fallback
+  // Sample data that ALWAYS loads
   const sampleProjects: Project[] = [
     {
       id: "1",
@@ -219,62 +207,21 @@ export const useProjects = (category: string = 'All') => {
     }
   ];
 
-  const fetchProjects = async () => {
-    setLoading(true);
-    setError(null);
-    
-    // Always start with sample data as fallback
-    const filteredSamples = category === 'All' 
+  // Filter projects based on category
+  const filteredProjects = category === 'All' 
+    ? sampleProjects 
+    : sampleProjects.filter(p => p.category === category);
+
+  const [projects, setProjects] = useState<Project[]>(filteredProjects);
+  const [loading, setLoading] = useState(false);
+
+  // Update projects when category changes
+  useEffect(() => {
+    const filtered = category === 'All' 
       ? sampleProjects 
       : sampleProjects.filter(p => p.category === category);
-    
-    try {
-      let query = supabase
-        .from('projects')
-        .select('*')
-        .order('featured_date', { ascending: false })
-        .order('stars', { ascending: false });
-
-      if (category !== 'All') {
-        query = query.eq('category', category as any);
-      }
-
-      const { data, error } = await query;
-
-      if (error || !data || data.length === 0) {
-        console.log('Using sample data as fallback');
-        setProjects(filteredSamples);
-      } else {
-        // If user is logged in, check which projects are favorited
-        if (user) {
-          const { data: favorites } = await supabase
-            .from('favorites')
-            .select('project_id')
-            .eq('user_id', user.id);
-
-          const favoritedIds = new Set(favorites?.map(f => f.project_id) || []);
-          
-          setProjects(
-            data.map(p => ({
-              ...p,
-              is_favorited: favoritedIds.has(p.id)
-            }))
-          );
-        } else {
-          setProjects(data);
-        }
-      }
-    } catch (err) {
-      console.log('Network error, using sample data:', err);
-      setProjects(filteredSamples);
-    }
-    
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchProjects();
-  }, [category, user]);
+    setProjects(filtered);
+  }, [category]);
 
   const toggleFavorite = async (projectId: string) => {
     if (!user) {
@@ -317,5 +264,5 @@ export const useProjects = (category: string = 'All') => {
     }
   };
 
-  return { projects, loading, error, toggleFavorite, refetch: fetchProjects };
+  return { projects, loading, toggleFavorite };
 };
