@@ -266,6 +266,6 @@ Your support helps keep GitDaily running and free for everyone!
 
 ---
 
-**Made with ❤️ by [Syed Khaja Moinuddin](https://github.com/S-YED) for the developer community**
+**Made by [Syed Khaja Moinuddin](https://github.com/S-YED) for the developer community**
 
 *GitDaily helps developers discover amazing open-source projects daily. Star the repo if you find it useful!*
