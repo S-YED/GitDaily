@@ -142,21 +142,50 @@ function determineCategory(topics, language) {
   return 'Tools'; // Default to Tools instead of Other
 }
 
-// Upsert projects into Supabase (insert or update if exists)
-async function upsertProjects(projects) {
-  const body = JSON.stringify(projects.map(repo => ({
-    repo_name: repo.full_name,
-    repo_url: repo.html_url,
-    description: repo.description,
-    language: repo.language,
-    stars: repo.stargazers_count,
-    forks: repo.forks_count,
-    topics: repo.topics || [],
-    category: determineCategory(repo.topics, repo.language),
-    featured_date: new Date().toISOString().split('T')[0],
-  })));
+// Insert projects one by one to handle duplicates
+async function insertProjects(projects) {
+  let inserted = 0;
+  let updated = 0;
+  
+  for (const repo of projects) {
+    const projectData = {
+      repo_name: repo.full_name,
+      repo_url: repo.html_url,
+      description: repo.description,
+      language: repo.language,
+      stars: repo.stargazers_count,
+      forks: repo.forks_count,
+      topics: repo.topics || [],
+      category: determineCategory(repo.topics, repo.language),
+      featured_date: new Date().toISOString().split('T')[0],
+    };
+    
+    try {
+      await insertSingleProject(projectData);
+      inserted++;
+    } catch (error) {
+      if (error.message.includes('409')) {
+        // Try to update existing project
+        try {
+          await updateProject(projectData);
+          updated++;
+        } catch (updateError) {
+          console.log(`⚠️ Skipped ${repo.full_name}: already exists`);
+        }
+      } else {
+        console.error(`❌ Error with ${repo.full_name}:`, error.message);
+      }
+    }
+  }
+  
+  console.log(`✅ Processed: ${inserted} new, ${updated} updated`);
+}
 
+// Insert single project
+function insertSingleProject(projectData) {
   return new Promise((resolve, reject) => {
+    const body = JSON.stringify(projectData);
+    
     const options = {
       hostname: new URL(SUPABASE_URL).hostname,
       path: '/rest/v1/projects',
@@ -164,8 +193,7 @@ async function upsertProjects(projects) {
       headers: {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_SERVICE_KEY,
-        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
-        'Prefer': 'resolution=merge-duplicates'
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
       }
     };
 
@@ -178,11 +206,54 @@ async function upsertProjects(projects) {
       
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('✅ Successfully processed projects');
           resolve(data);
         } else {
-          console.error('❌ Supabase error:', res.statusCode, data);
-          reject(new Error(`Supabase error: ${res.statusCode}`));
+          reject(new Error(`${res.statusCode}: ${data}`));
+        }
+      });
+    });
+
+    req.on('error', (error) => {
+      reject(error);
+    });
+
+    req.write(body);
+    req.end();
+  });
+}
+
+// Update existing project
+function updateProject(projectData) {
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify({
+      stars: projectData.stars,
+      forks: projectData.forks,
+      featured_date: projectData.featured_date
+    });
+    
+    const options = {
+      hostname: new URL(SUPABASE_URL).hostname,
+      path: `/rest/v1/projects?repo_url=eq.${encodeURIComponent(projectData.repo_url)}`,
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(`${res.statusCode}: ${data}`));
         }
       });
     });
@@ -209,8 +280,8 @@ async function main() {
     
     console.log(`📦 Found ${data.items.length} repositories`);
     
-    // Upsert into Supabase
-    await upsertProjects(data.items);
+    // Insert into Supabase
+    await insertProjects(data.items);
     
     console.log('✅ Daily fetch completed successfully!');
   } catch (error) {
