@@ -16,7 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const Index = () => {
   const [activeCategory, setActiveCategory] = useState("All");
-  const { projects, loading, toggleFavorite } = useProjects(activeCategory);
+  const { projects, loading, error, toggleFavorite } = useProjects(activeCategory);
   const { user } = useAuth();
 
   return (
@@ -111,9 +111,26 @@ const Index = () => {
 
               {projects.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground text-lg">
-                    No projects found in this category yet. Check back soon!
-                  </p>
+                  {error ? (
+                    <div className="space-y-4">
+                      <p className="text-red-500 text-lg font-medium">
+                        ⚠️ Database Connection Issue
+                      </p>
+                      <p className="text-muted-foreground">
+                        {error}
+                      </p>
+                      <button 
+                        onClick={() => window.location.reload()} 
+                        className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground text-lg">
+                      No projects found in this category yet. Check back soon!
+                    </p>
+                  )}
                 </div>
               )}
             </>
