@@ -10,7 +10,7 @@
  * - SUPABASE_SERVICE_ROLE_KEY: Your Supabase service role key (set in GitHub Secrets)
  */
 
-const https = require('https');
+import https from 'https';
 
 // Configuration
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
