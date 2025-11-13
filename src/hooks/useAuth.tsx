@@ -3,13 +3,14 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { Sparkles } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string, username?: string) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, username?: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -21,21 +22,68 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const trackVisit = async (userId: string) => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('visits, streak, last_visited')
+      .eq('id', userId)
+      .single();
+
+    if (!profile) return;
+
+    const lastVisited = profile.last_visited ? new Date(profile.last_visited).toISOString().split('T')[0] : null;
+    
+    if (lastVisited === today) return;
+
+    let newStreak = profile.streak || 0;
+    
+    if (lastVisited) {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      
+      if (lastVisited === yesterdayStr) {
+        newStreak += 1;
+      } else {
+        newStreak = 1;
+      }
+    } else {
+      newStreak = 1;
+    }
+
+    await supabase
+      .from('profiles')
+      .update({
+        visits: (profile.visits || 0) + 1,
+        streak: newStreak,
+        last_visited: new Date().toISOString()
+      })
+      .eq('id', userId);
+  };
+
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        if (session?.user && event === 'SIGNED_IN') {
+          await trackVisit(session.user.id);
+        }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      if (session?.user) {
+        await trackVisit(session.user.id);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -56,8 +104,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     
     if (!error) {
-      toast.success('Account created successfully!');
-      setTimeout(() => navigate('/'), 100);
+      toast.success(
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-yellow-500" />
+          <div>
+            <div className="font-semibold">🎉 Welcome to GitDaily!</div>
+            <div className="text-sm text-muted-foreground">
+              Check your email for confirmation link
+            </div>
+          </div>
+        </div>,
+        { duration: 6000 }
+      );
     }
     return { error };
   };

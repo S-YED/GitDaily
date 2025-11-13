@@ -1,167 +1,150 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
-import Navbar from "@/components/Navbar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
-import { Send } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { categories } from "@/data/projects";
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useBadges } from '@/hooks/useBadges';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import Navbar from '@/components/Navbar';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Send } from 'lucide-react';
 
 const Submit = () => {
   const { user } = useAuth();
+  const { checkAndAwardBadges } = useBadges();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    repoName: "",
-    repoUrl: "",
-    category: "",
-    description: "",
-    reason: "",
+    repo_url: '',
+    repo_name: '',
+    category: '',
+    description: '',
+    reason: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!user) {
       toast.error('Please sign in to submit projects');
-      navigate('/auth');
       return;
     }
 
     setLoading(true);
-
     try {
       const { error } = await supabase
         .from('submissions')
         .insert({
           user_id: user.id,
-          repo_url: formData.repoUrl,
-          repo_name: formData.repoName,
-          category: formData.category as any,
-          description: formData.description,
-          reason: formData.reason,
+          ...formData
         });
 
       if (error) throw error;
 
-      toast.success("Project submitted successfully! We'll review it soon.");
-      setFormData({ repoName: "", repoUrl: "", category: "", description: "", reason: "" });
-    } catch (error: any) {
-      console.error('Error:', error);
-      toast.error(error.message || 'Failed to submit project');
+      toast.success('Project submitted successfully!');
+      await checkAndAwardBadges(user.id);
+      navigate('/profile');
+    } catch (error) {
+      console.error('Submission error:', error);
+      toast.error('Failed to submit project. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-12 text-center">
+          <h1 className="text-2xl font-bold mb-4">Sign in Required</h1>
+          <p>Please sign in to submit projects.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="space-y-6 animate-fade-in">
-          <div className="text-center space-y-2">
-            <h1 className="text-4xl font-bold font-mono">
-              Submit a <span className="text-primary">Project</span>
-            </h1>
-            <p className="text-muted-foreground">
-              Share an awesome open source project for tomorrow's picks
-            </p>
-          </div>
-
-          <Card className="p-8 bg-gradient-card border-border shadow-card">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="repoName">Repository Name *</Label>
+      <div className="container mx-auto px-4 py-12">
+        <Card className="max-w-2xl mx-auto">
+          <CardHeader>
+            <CardTitle className="font-mono flex items-center gap-2">
+              <Send className="h-5 w-5" />
+              Submit Project
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Repository URL</label>
                 <Input
-                  id="repoName"
-                  placeholder="owner/repository"
-                  value={formData.repoName}
-                  onChange={(e) => setFormData({ ...formData, repoName: e.target.value })}
                   required
-                  className="bg-background"
+                  placeholder="https://github.com/user/repo"
+                  value={formData.repo_url}
+                  onChange={(e) => setFormData({...formData, repo_url: e.target.value})}
+                />
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium">Repository Name</label>
+                <Input
+                  required
+                  placeholder="awesome-project"
+                  value={formData.repo_name}
+                  onChange={(e) => setFormData({...formData, repo_name: e.target.value})}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="repoUrl">GitHub URL *</Label>
-                <Input
-                  id="repoUrl"
-                  type="url"
-                  placeholder="https://github.com/username/repo"
-                  value={formData.repoUrl}
-                  onChange={(e) => setFormData({ ...formData, repoUrl: e.target.value })}
-                  required
-                  className="bg-background"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category *</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                  required
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select a category" />
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.filter(c => c !== "All").map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
+                    <SelectItem value="AI">AI</SelectItem>
+                    <SelectItem value="WebDev">WebDev</SelectItem>
+                    <SelectItem value="DevOps">DevOps</SelectItem>
+                    <SelectItem value="Mobile">Mobile</SelectItem>
+                    <SelectItem value="Data">Data</SelectItem>
+                    <SelectItem value="Security">Security</SelectItem>
+                    <SelectItem value="Tools">Tools</SelectItem>
+                    <SelectItem value="Gaming">Gaming</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+              <div>
+                <label className="text-sm font-medium">Description</label>
                 <Textarea
-                  id="description"
-                  placeholder="What makes this project awesome?"
+                  placeholder="Brief description of the project..."
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={4}
-                  className="bg-background resize-none"
+                  onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="reason">Why is it trending?</Label>
+              <div>
+                <label className="text-sm font-medium">Why is this trending?</label>
                 <Textarea
-                  id="reason"
-                  placeholder="Recent updates, viral thread, new release, etc."
+                  required
+                  placeholder="Explain why this project should be featured..."
                   value={formData.reason}
-                  onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
-                  rows={3}
-                  className="bg-background resize-none"
+                  onChange={(e) => setFormData({...formData, reason: e.target.value})}
                 />
               </div>
 
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90" size="lg" disabled={loading}>
-                <Send className="h-4 w-4 mr-2" />
+              <Button type="submit" disabled={loading} className="w-full">
                 {loading ? 'Submitting...' : 'Submit Project'}
               </Button>
             </form>
-          </Card>
-
-          <Card className="p-6 bg-muted/50 border-border">
-            <h3 className="font-semibold mb-2">Submission Guidelines</h3>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>• Project must be open source and publicly accessible</li>
-              <li>• Active development with recent commits preferred</li>
-              <li>• Clear documentation and README required</li>
-              <li>• Should solve a real problem or provide unique value</li>
-              <li>• Reviewed daily for inclusion in tomorrow's picks</li>
-            </ul>
-          </Card>
-        </div>
-      </main>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

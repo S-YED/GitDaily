@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Github, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { Github, Mail, Lock, User as UserIcon, Sparkles, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -74,15 +75,33 @@ const Auth = () => {
             </CardTitle>
             <CardDescription>
               {isSignUp 
-                ? 'Sign up to start curating your daily picks' 
-                : 'Sign in to your account to continue'}
+                ? (
+                  <div className="space-y-2">
+                    <p>Join the community and unlock exclusive features:</p>
+                    <div className="space-y-1 text-xs font-mono">
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Personal REST API with auth tokens
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Advanced filters (stars, language, recency)
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Real-time trending alerts via webhooks
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-green-500">✓</span> Weekly analytics & growth metrics
+                      </div>
+                    </div>
+                  </div>
+                ) 
+                : 'Welcome back! Continue your journey'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               {isSignUp && (
                 <div className="space-y-2">
-                  <Label htmlFor="username">Username (optional)</Label>
+                  <Label htmlFor="username">Username</Label>
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -149,6 +168,25 @@ const Auth = () => {
                 )}
               </Button>
             </form>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => supabase.auth.signInWithOAuth({ provider: 'github' })}
+            >
+              <Github className="mr-2 h-4 w-4" />
+              GitHub
+            </Button>
 
             <div className="text-center text-sm">
               <button

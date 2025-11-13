@@ -161,12 +161,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [GitHub Discussions](https://github.com/gitdaily/gitdaily/discussions)
 - [Discord](https://discord.gg/gitdaily) (Coming soon)
 
+## 💖 Support GitDaily
+
+GitDaily is free and open-source, built and maintained by **Syed Khaja Moinuddin** ([@S-YED](https://github.com/S-YED)).
+
+If you find GitDaily useful, consider supporting the project:
+
+- ⭐ [Star the repository](https://github.com/S-YED/awesome-hub-feed)
+- 💖 [GitHub Sponsors](https://github.com/sponsors/S-YED)
+- ☕ [Buy me a coffee](https://buymeacoffee.com/syedkhajams)
+- ⚡ [Ko-fi](https://ko-fi.com/syedkhaja)
+
+Your support helps keep GitDaily running and free for everyone!
+
 ## 🙏 Acknowledgments
 
 - Inspired by GitHub Trending and Product Hunt
-- Built with [Lovable](https://lovable.dev)
+- Built with modern web technologies
 - UI components from [shadcn/ui](https://ui.shadcn.com)
 
 ---
 
-**Made with ❤️ by the open-source community**
+**Made with ❤️ by [Syed Khaja Moinuddin](https://github.com/S-YED) for the developer community**

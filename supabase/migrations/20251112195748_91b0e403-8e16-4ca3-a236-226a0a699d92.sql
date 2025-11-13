@@ -127,6 +127,12 @@ CREATE POLICY "Projects are viewable by everyone"
   ON public.projects FOR SELECT
   USING (true);
 
+-- Allow service role to insert projects (for GitHub workflow)
+CREATE POLICY "Service role can insert projects"
+  ON public.projects FOR INSERT
+  TO service_role
+  WITH CHECK (true);
+
 CREATE POLICY "Admins can insert projects"
   ON public.projects FOR INSERT
   TO authenticated

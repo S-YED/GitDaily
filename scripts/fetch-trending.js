@@ -24,34 +24,54 @@ if (!GITHUB_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
 
 // Category mapping based on topics/languages
 const categoryMapping = {
-  'ai': 'AI',
-  'machine-learning': 'AI',
-  'deep-learning': 'AI',
-  'artificial-intelligence': 'AI',
-  'llm': 'AI',
-  'web': 'WebDev',
-  'react': 'WebDev',
-  'vue': 'WebDev',
-  'angular': 'WebDev',
-  'frontend': 'WebDev',
-  'backend': 'WebDev',
-  'devops': 'DevOps',
-  'kubernetes': 'DevOps',
-  'docker': 'DevOps',
-  'ci-cd': 'DevOps',
-  'mobile': 'Mobile',
-  'ios': 'Mobile',
-  'android': 'Mobile',
-  'react-native': 'Mobile',
-  'data': 'Data',
-  'database': 'Data',
-  'analytics': 'Data',
-  'security': 'Security',
-  'cybersecurity': 'Security',
-  'tools': 'Tools',
-  'cli': 'Tools',
-  'game': 'Gaming',
-  'gaming': 'Gaming',
+  // AI & Machine Learning
+  'ai': 'AI', 'artificial-intelligence': 'AI', 'machine-learning': 'AI', 'deep-learning': 'AI',
+  'llm': 'AI', 'neural-network': 'AI', 'tensorflow': 'AI', 'pytorch': 'AI', 'opencv': 'AI',
+  'nlp': 'AI', 'computer-vision': 'AI', 'chatbot': 'AI', 'gpt': 'AI', 'transformers': 'AI',
+  
+  // Web Development
+  'web': 'WebDev', 'frontend': 'WebDev', 'backend': 'WebDev', 'fullstack': 'WebDev',
+  'react': 'WebDev', 'vue': 'WebDev', 'angular': 'WebDev', 'svelte': 'WebDev', 'nextjs': 'WebDev',
+  'nodejs': 'WebDev', 'express': 'WebDev', 'fastapi': 'WebDev', 'django': 'WebDev', 'flask': 'WebDev',
+  'javascript': 'WebDev', 'typescript': 'WebDev', 'html': 'WebDev', 'css': 'WebDev', 'sass': 'WebDev',
+  'tailwindcss': 'WebDev', 'bootstrap': 'WebDev', 'webpack': 'WebDev', 'vite': 'WebDev',
+  'api': 'WebDev', 'rest': 'WebDev', 'graphql': 'WebDev', 'websocket': 'WebDev',
+  
+  // DevOps & Infrastructure
+  'devops': 'DevOps', 'kubernetes': 'DevOps', 'docker': 'DevOps', 'ci-cd': 'DevOps',
+  'terraform': 'DevOps', 'ansible': 'DevOps', 'jenkins': 'DevOps', 'github-actions': 'DevOps',
+  'aws': 'DevOps', 'azure': 'DevOps', 'gcp': 'DevOps', 'cloud': 'DevOps', 'serverless': 'DevOps',
+  'monitoring': 'DevOps', 'prometheus': 'DevOps', 'grafana': 'DevOps', 'nginx': 'DevOps',
+  
+  // Mobile Development
+  'mobile': 'Mobile', 'ios': 'Mobile', 'android': 'Mobile', 'react-native': 'Mobile',
+  'flutter': 'Mobile', 'swift': 'Mobile', 'kotlin': 'Mobile', 'xamarin': 'Mobile',
+  'ionic': 'Mobile', 'cordova': 'Mobile', 'app': 'Mobile',
+  
+  // Data & Analytics
+  'data': 'Data', 'database': 'Data', 'analytics': 'Data', 'big-data': 'Data',
+  'sql': 'Data', 'postgresql': 'Data', 'mysql': 'Data', 'mongodb': 'Data', 'redis': 'Data',
+  'elasticsearch': 'Data', 'spark': 'Data', 'hadoop': 'Data', 'etl': 'Data', 'data-science': 'Data',
+  'pandas': 'Data', 'numpy': 'Data', 'jupyter': 'Data', 'visualization': 'Data',
+  
+  // Security
+  'security': 'Security', 'cybersecurity': 'Security', 'encryption': 'Security',
+  'authentication': 'Security', 'oauth': 'Security', 'jwt': 'Security', 'penetration-testing': 'Security',
+  'vulnerability': 'Security', 'firewall': 'Security', 'blockchain': 'Security',
+  
+  // Tools & Utilities
+  'tools': 'Tools', 'cli': 'Tools', 'utility': 'Tools', 'automation': 'Tools',
+  'productivity': 'Tools', 'editor': 'Tools', 'ide': 'Tools', 'vscode': 'Tools',
+  'git': 'Tools', 'github': 'Tools', 'terminal': 'Tools', 'shell': 'Tools',
+  
+  // Gaming
+  'game': 'Gaming', 'gaming': 'Gaming', 'unity': 'Gaming', 'unreal': 'Gaming',
+  'gamedev': 'Gaming', 'game-engine': 'Gaming', '2d': 'Gaming', '3d': 'Gaming',
+  
+  // Languages -> Categories
+  'python': 'AI', 'java': 'WebDev', 'c++': 'Tools', 'c#': 'Tools', 'go': 'DevOps',
+  'rust': 'Tools', 'php': 'WebDev', 'ruby': 'WebDev', 'scala': 'Data', 'r': 'Data',
+  'matlab': 'Data', 'shell': 'DevOps', 'powershell': 'DevOps', 'bash': 'DevOps'
 };
 
 // Fetch trending repositories from GitHub
@@ -59,7 +79,7 @@ async function fetchTrending() {
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'api.github.com',
-      path: '/search/repositories?q=created:>2025-01-01&sort=stars&order=desc&per_page=30',
+      path: '/search/repositories?q=created:>2024-12-01&sort=stars&order=desc&per_page=30',
       method: 'GET',
       headers: {
         'User-Agent': 'GitDaily-Bot',
@@ -94,12 +114,18 @@ async function fetchTrending() {
 
 // Determine category based on topics and language
 function determineCategory(topics, language) {
-  // Check topics first
+  // Check topics first (more specific)
   if (topics && topics.length > 0) {
     for (const topic of topics) {
-      const normalized = topic.toLowerCase();
+      const normalized = topic.toLowerCase().replace(/[^a-z0-9]/g, '-');
       if (categoryMapping[normalized]) {
         return categoryMapping[normalized];
+      }
+      // Also check partial matches
+      for (const [key, category] of Object.entries(categoryMapping)) {
+        if (normalized.includes(key) || key.includes(normalized)) {
+          return category;
+        }
       }
     }
   }
@@ -112,13 +138,12 @@ function determineCategory(topics, language) {
     }
   }
   
-  return 'Other';
+  // Check repo name for hints
+  return 'Tools'; // Default to Tools instead of Other
 }
 
-// Insert projects into Supabase
-async function insertProjects(projects) {
-  const url = `${SUPABASE_URL}/rest/v1/projects`;
-  
+// Upsert projects into Supabase (insert or update if exists)
+async function upsertProjects(projects) {
   const body = JSON.stringify(projects.map(repo => ({
     repo_name: repo.full_name,
     repo_url: repo.html_url,
@@ -153,7 +178,7 @@ async function insertProjects(projects) {
       
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          console.log('✅ Successfully inserted projects');
+          console.log('✅ Successfully processed projects');
           resolve(data);
         } else {
           console.error('❌ Supabase error:', res.statusCode, data);
@@ -184,8 +209,8 @@ async function main() {
     
     console.log(`📦 Found ${data.items.length} repositories`);
     
-    // Insert into Supabase
-    await insertProjects(data.items);
+    // Upsert into Supabase
+    await upsertProjects(data.items);
     
     console.log('✅ Daily fetch completed successfully!');
   } catch (error) {
