@@ -85,7 +85,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Button asChild variant="default" size="sm" className="glass-strong shadow-glow hover:shadow-glow-strong hover:scale-105 transition-all duration-300 font-semibold">
+              <Button asChild variant="default" size="sm" className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-glow hover:shadow-glow-strong hover:scale-105 transition-all duration-300 font-semibold border-0">
                 <Link to="/auth">
                   <UserIcon className="h-4 w-4 mr-2" />
                   Sign In
@@ -153,7 +153,7 @@ const Navbar = () => {
                 </Button>
               </>
             ) : (
-              <Button asChild variant="default" size="sm" className="w-full bg-primary hover:bg-primary/90">
+              <Button asChild variant="default" size="sm" className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground border-0">
                 <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
                   <UserIcon className="h-4 w-4 mr-2" />
                   Sign In

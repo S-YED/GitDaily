@@ -235,7 +235,7 @@ export const useProjects = (category: string = 'All') => {
           ? sampleProjects 
           : sampleProjects.filter(p => p.category === category);
         setProjects(filteredSamples);
-      } else if (data && data.length > 0) {
+      } else if (data) {
         // If user is logged in, check which projects are favorited
         if (user) {
           const { data: favorites } = await supabase
@@ -254,6 +254,12 @@ export const useProjects = (category: string = 'All') => {
         } else {
           setProjects(data);
         }
+      } else {
+        // No data from database, use sample data
+        const filteredSamples = category === 'All' 
+          ? sampleProjects 
+          : sampleProjects.filter(p => p.category === category);
+        setProjects(filteredSamples);
       }
     } catch (err) {
       console.error('Network error:', err);
