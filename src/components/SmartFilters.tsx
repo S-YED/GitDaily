@@ -53,7 +53,7 @@ const SmartFilters = () => {
     }
 
     if (filters.category !== 'all') {
-      query = query.eq('category', filters.category);
+      query = query.eq('category', filters.category as any);
     }
 
     const { count } = await query;
