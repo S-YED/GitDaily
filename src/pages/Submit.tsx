@@ -36,10 +36,14 @@ const Submit = () => {
     try {
       const { error } = await supabase
         .from('submissions')
-        .insert({
+        .insert([{
           user_id: user.id,
-          ...formData
-        });
+          repo_url: formData.repo_url,
+          repo_name: formData.repo_name,
+          category: formData.category as any,
+          description: formData.description,
+          reason: formData.reason
+        }]);
 
       if (error) throw error;
 

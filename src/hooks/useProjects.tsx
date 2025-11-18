@@ -57,7 +57,7 @@ export const useProjects = (category: string = 'All') => {
         .order('stars', { ascending: false });
 
       if (category !== 'All') {
-        query = query.eq('category', category);
+        query = query.eq('category', category as any);
       }
 
       const { data, error } = await query;
