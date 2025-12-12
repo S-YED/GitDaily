@@ -24,7 +24,7 @@ jobs:
           
       - name: Fetch trending repositories
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TRENDING_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: |
@@ -37,3 +37,48 @@ jobs:
           git add -A
           git diff --staged --quiet || git commit -m "chore: daily trending update $(date +'%Y-%m-%d')"
           git push || true
+
+      - name: Alert on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GH_TRENDING_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = 'Daily trending fetch failed';
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+            const body = `The scheduled Daily Trending Fetch workflow failed.\n\nRun: ${runUrl}\nTriggered by: ${context.actor}`;
+            async function findExistingIssue() {
+              try {
+                const { data } = await github.rest.issues.listForRepo({
+                  owner,
+                  repo,
+                  state: 'open',
+                  labels: 'daily-fetch-alert',
+                  per_page: 100
+                });
+                return data.find(issue => issue.title === title);
+              } catch (error) {
+                core.warning(`Unable to list issues: ${error.message}`);
+                return null;
+              }
+            }
+
+            const existing = await findExistingIssue();
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body: `Additional failure detected.\n\nRun: ${runUrl}`
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['daily-fetch-alert']
+              });
+            }
