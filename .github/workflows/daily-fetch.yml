@@ -5,6 +5,10 @@ on:
     - cron: '0 6 * * *'  # Daily at 6 AM UTC
   workflow_dispatch:  # Allow manual trigger
 
+permissions:
+  contents: write
+  issues: write
+
 jobs:
   fetch-trending:
     runs-on: ubuntu-latest
@@ -31,12 +35,15 @@ jobs:
           node scripts/fetch-trending.js
           
       - name: Commit results (optional)
+        env:
+          GH_TRENDING_TOKEN: ${{ secrets.GH_TRENDING_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "actions@github.com"
+          git remote set-url origin https://github-actions:${GH_TRENDING_TOKEN}@github.com/${{ github.repository }}.git
           git add -A
           git diff --staged --quiet || git commit -m "chore: daily trending update $(date +'%Y-%m-%d')"
-          git push || true
+          git push origin HEAD:${{ github.ref_name }} || true
 
       - name: Alert on failure
         if: failure()
