@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
+import { useAuth } from './use-auth-hook';
 import { toast } from 'sonner';
 
 export interface Project {
@@ -20,13 +20,15 @@ export interface Project {
   is_favorited?: boolean;
 }
 
+<<<<<<< HEAD
 export const useProjects = (category: string = 'All') => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [activeFeaturedDate, setActiveFeaturedDate] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -50,14 +52,35 @@ export const useProjects = (category: string = 'All') => {
       
       console.log('✅ Connection successful, total projects:', testData);
       
-      let query = supabase
-        .from('projects')
-        .select('*')
-        .order('featured_date', { ascending: false })
-        .order('stars', { ascending: false });
+      const todayUtc = new Date().toISOString().split('T')[0];
+      console.log('📅 Today (UTC) is:', todayUtc);
 
+      const buildQuery = (date: string) =>
+        supabase
+          .from('projects')
+          .select('*')
+          .eq('featured_date', date)
+          .order('featured_date', { ascending: false })
+          .order('stars', { ascending: false });
+
+      // Always prefer whatever date is newest in the DB.
+      // This avoids timezone confusion (UI) and "successful" runs that actually wrote to a different day.
+      const { data: latestDateRows, error: latestDateError } = await supabase
+        .from('projects')
+        .select('featured_date')
+        .order('featured_date', { ascending: false })
+        .limit(1);
+
+      const targetDate = latestDateError
+        ? todayUtc
+        : (latestDateRows?.[0]?.featured_date || todayUtc);
+
+      setActiveFeaturedDate(targetDate);
+      console.log('🗓️ Using featured_date:', targetDate);
+
+      let query = buildQuery(targetDate);
       if (category !== 'All') {
-        query = query.eq('category', category as any);
+        query = query.eq('category', category);
       }
 
       const { data, error } = await query;
@@ -101,12 +124,12 @@ export const useProjects = (category: string = 'All') => {
     }
     
     setLoading(false);
-  };
+  }, [category, user, setLoading, setError, setProjects]);
 
   useEffect(() => {
     console.log('🔄 useProjects effect triggered for category:', category);
     fetchProjects();
-  }, [category, user]);
+  }, [category, user, fetchProjects]);
   
   // Debug log when projects change
   useEffect(() => {

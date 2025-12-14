@@ -10,76 +10,65 @@
  * - SUPABASE_SERVICE_ROLE_KEY: Your Supabase service role key (set in GitHub Secrets)
  */
 
+import 'dotenv/config';
 import https from 'https';
+import {
+  normalizeTopics,
+  buildSummary,
+  buildWhyTrending,
+  resolveDemoUrl,
+} from './lib/project-metadata.js';
+import { determineCategory } from './lib/category-mapper.js';
 
 // Configuration
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+// NOTE: GitHub Actions secrets cannot be named "GITHUB_TOKEN", but we can still
+// expose the token to the script as either env var name.
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || process.env.GH_TRENDING_TOKEN;
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!GITHUB_TOKEN || !SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-  console.error('Missing required environment variables');
+  const missing = [
+    !GITHUB_TOKEN ? 'GITHUB_TOKEN (or GH_TRENDING_TOKEN)' : null,
+    !SUPABASE_URL ? 'SUPABASE_URL' : null,
+    !SUPABASE_SERVICE_KEY ? 'SUPABASE_SERVICE_ROLE_KEY' : null,
+  ].filter(Boolean);
+  console.error(`Missing required environment variables: ${missing.join(', ')}`);
   process.exit(1);
 }
 
-// Category mapping based on topics/languages
-const categoryMapping = {
-  // AI & Machine Learning
-  'ai': 'AI', 'artificial-intelligence': 'AI', 'machine-learning': 'AI', 'deep-learning': 'AI',
-  'llm': 'AI', 'neural-network': 'AI', 'tensorflow': 'AI', 'pytorch': 'AI', 'opencv': 'AI',
-  'nlp': 'AI', 'computer-vision': 'AI', 'chatbot': 'AI', 'gpt': 'AI', 'transformers': 'AI',
-  
-  // Web Development
-  'web': 'WebDev', 'frontend': 'WebDev', 'backend': 'WebDev', 'fullstack': 'WebDev',
-  'react': 'WebDev', 'vue': 'WebDev', 'angular': 'WebDev', 'svelte': 'WebDev', 'nextjs': 'WebDev',
-  'nodejs': 'WebDev', 'express': 'WebDev', 'fastapi': 'WebDev', 'django': 'WebDev', 'flask': 'WebDev',
-  'javascript': 'WebDev', 'typescript': 'WebDev', 'html': 'WebDev', 'css': 'WebDev', 'sass': 'WebDev',
-  'tailwindcss': 'WebDev', 'bootstrap': 'WebDev', 'webpack': 'WebDev', 'vite': 'WebDev',
-  'api': 'WebDev', 'rest': 'WebDev', 'graphql': 'WebDev', 'websocket': 'WebDev',
-  
-  // DevOps & Infrastructure
-  'devops': 'DevOps', 'kubernetes': 'DevOps', 'docker': 'DevOps', 'ci-cd': 'DevOps',
-  'terraform': 'DevOps', 'ansible': 'DevOps', 'jenkins': 'DevOps', 'github-actions': 'DevOps',
-  'aws': 'DevOps', 'azure': 'DevOps', 'gcp': 'DevOps', 'cloud': 'DevOps', 'serverless': 'DevOps',
-  'monitoring': 'DevOps', 'prometheus': 'DevOps', 'grafana': 'DevOps', 'nginx': 'DevOps',
-  
-  // Mobile Development
-  'mobile': 'Mobile', 'ios': 'Mobile', 'android': 'Mobile', 'react-native': 'Mobile',
-  'flutter': 'Mobile', 'swift': 'Mobile', 'kotlin': 'Mobile', 'xamarin': 'Mobile',
-  'ionic': 'Mobile', 'cordova': 'Mobile', 'app': 'Mobile',
-  
-  // Data & Analytics
-  'data': 'Data', 'database': 'Data', 'analytics': 'Data', 'big-data': 'Data',
-  'sql': 'Data', 'postgresql': 'Data', 'mysql': 'Data', 'mongodb': 'Data', 'redis': 'Data',
-  'elasticsearch': 'Data', 'spark': 'Data', 'hadoop': 'Data', 'etl': 'Data', 'data-science': 'Data',
-  'pandas': 'Data', 'numpy': 'Data', 'jupyter': 'Data', 'visualization': 'Data',
-  
-  // Security
-  'security': 'Security', 'cybersecurity': 'Security', 'encryption': 'Security',
-  'authentication': 'Security', 'oauth': 'Security', 'jwt': 'Security', 'penetration-testing': 'Security',
-  'vulnerability': 'Security', 'firewall': 'Security', 'blockchain': 'Security',
-  
-  // Tools & Utilities
-  'tools': 'Tools', 'cli': 'Tools', 'utility': 'Tools', 'automation': 'Tools',
-  'productivity': 'Tools', 'editor': 'Tools', 'ide': 'Tools', 'vscode': 'Tools',
-  'git': 'Tools', 'github': 'Tools', 'terminal': 'Tools', 'shell': 'Tools',
-  
-  // Gaming
-  'game': 'Gaming', 'gaming': 'Gaming', 'unity': 'Gaming', 'unreal': 'Gaming',
-  'gamedev': 'Gaming', 'game-engine': 'Gaming', '2d': 'Gaming', '3d': 'Gaming',
-  
-  // Languages -> Categories
-  'python': 'AI', 'java': 'WebDev', 'c++': 'Tools', 'c#': 'Tools', 'go': 'DevOps',
-  'rust': 'Tools', 'php': 'WebDev', 'ruby': 'WebDev', 'scala': 'Data', 'r': 'Data',
-  'matlab': 'Data', 'shell': 'DevOps', 'powershell': 'DevOps', 'bash': 'DevOps'
+// Best-effort sanity check: warn if the provided key doesn't look like a service role JWT.
+try {
+  const [, payload] = String(SUPABASE_SERVICE_KEY).split('.');
+  if (payload) {
+    const json = JSON.parse(Buffer.from(payload, 'base64').toString('utf8'));
+    const role = json?.role;
+    if (role && role !== 'service_role') {
+      console.warn(`⚠️ SUPABASE_SERVICE_ROLE_KEY role is "${role}" (expected "service_role"). Deletes/updates may be blocked by RLS.`);
+    }
+  }
+} catch {
+  // ignore
+}
+
+
+const LOOKBACK_DAYS = Number(process.env.TRENDING_LOOKBACK_DAYS || 7);
+const RUN_DAY = new Date();
+const TODAY = RUN_DAY.toISOString().split('T')[0];
+
+const getSinceDate = () => {
+  const since = new Date();
+  since.setDate(since.getDate() - Math.max(1, LOOKBACK_DAYS));
+  return since.toISOString().split('T')[0];
 };
 
 // Fetch trending repositories from GitHub
 async function fetchTrending() {
+  const createdAfter = getSinceDate();
   return new Promise((resolve, reject) => {
     const options = {
       hostname: 'api.github.com',
-      path: '/search/repositories?q=created:>2024-12-01&sort=stars&order=desc&per_page=30',
+      path: `/search/repositories?q=created:%3E${createdAfter}&sort=stars&order=desc&per_page=30`,
       method: 'GET',
       headers: {
         'User-Agent': 'GitDaily-Bot',
@@ -112,42 +101,17 @@ async function fetchTrending() {
   });
 }
 
-// Determine category based on topics and language
-function determineCategory(topics, language) {
-  // Check topics first (more specific)
-  if (topics && topics.length > 0) {
-    for (const topic of topics) {
-      const normalized = topic.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      if (categoryMapping[normalized]) {
-        return categoryMapping[normalized];
-      }
-      // Also check partial matches
-      for (const [key, category] of Object.entries(categoryMapping)) {
-        if (normalized.includes(key) || key.includes(normalized)) {
-          return category;
-        }
-      }
-    }
-  }
-  
-  // Check language
-  if (language) {
-    const normalized = language.toLowerCase();
-    if (categoryMapping[normalized]) {
-      return categoryMapping[normalized];
-    }
-  }
-  
-  // Check repo name for hints
-  return 'Tools'; // Default to Tools instead of Other
-}
-
 // Insert projects one by one to handle duplicates
-async function insertProjects(projects) {
+async function insertProjects(projects, featuredDate = TODAY) {
   let inserted = 0;
   let updated = 0;
   
   for (const repo of projects) {
+    const category = determineCategory({
+      topics: repo.topics,
+      language: repo.language,
+      repoName: repo.full_name,
+    });
     const projectData = {
       repo_name: repo.full_name,
       repo_url: repo.html_url,
@@ -155,9 +119,23 @@ async function insertProjects(projects) {
       language: repo.language,
       stars: repo.stargazers_count,
       forks: repo.forks_count,
-      topics: repo.topics || [],
-      category: determineCategory(repo.topics, repo.language),
-      featured_date: new Date().toISOString().split('T')[0],
+      topics: normalizeTopics(repo.topics, category),
+      category,
+      featured_date: featuredDate,
+      ai_summary: buildSummary({
+        name: repo.full_name,
+        description: repo.description,
+        category,
+        language: repo.language,
+      }),
+      why_trending: buildWhyTrending({
+        name: repo.full_name,
+        stars: repo.stargazers_count,
+        forks: repo.forks_count,
+        category,
+        windowDays: LOOKBACK_DAYS,
+      }),
+      demo_url: resolveDemoUrl({ homepage: repo.homepage, repoUrl: repo.html_url }),
     };
     
     try {
@@ -179,6 +157,96 @@ async function insertProjects(projects) {
   }
   
   console.log(`✅ Processed: ${inserted} new, ${updated} updated`);
+}
+
+async function cleanupOldProjects(featuredDate = TODAY) {
+  console.log(`🧹 Removing projects dated before ${featuredDate}...`);
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: new URL(SUPABASE_URL).hostname,
+      path: `/rest/v1/projects?featured_date=lt.${featuredDate}`,
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Prefer': 'return=representation'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const removed = data ? (() => {
+            try {
+              const parsed = JSON.parse(data);
+              return Array.isArray(parsed) ? parsed.length : 0;
+            } catch {
+              return 0;
+            }
+          })() : 0;
+          console.log(`🧽 Cleanup removed ${removed} stale project${removed === 1 ? '' : 's'}.`);
+          resolve();
+        } else {
+          reject(new Error(`${res.statusCode}: ${data}`));
+        }
+      });
+    });
+
+    req.on('error', (error) => reject(error));
+    req.end();
+  });
+}
+
+async function purgeProjectsForDate(featuredDate = TODAY) {
+  console.log(`🧼 Clearing existing projects for ${featuredDate} before insert...`);
+
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: new URL(SUPABASE_URL).hostname,
+      path: `/rest/v1/projects?featured_date=eq.${featuredDate}`,
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_SERVICE_KEY,
+        'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+        'Prefer': 'return=representation'
+      }
+    };
+
+    const req = https.request(options, (res) => {
+      let data = '';
+
+      res.on('data', (chunk) => {
+        data += chunk;
+      });
+
+      res.on('end', () => {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          const removed = data ? (() => {
+            try {
+              const parsed = JSON.parse(data);
+              return Array.isArray(parsed) ? parsed.length : 0;
+            } catch {
+              return 0;
+            }
+          })() : 0;
+          console.log(`🧾 Removed ${removed} project${removed === 1 ? '' : 's'} for ${featuredDate}.`);
+          resolve();
+        } else {
+          reject(new Error(`${res.statusCode}: ${data}`));
+        }
+      });
+    });
+
+    req.on('error', (error) => reject(error));
+    req.end();
+  });
 }
 
 // Insert single project
@@ -228,7 +296,13 @@ function updateProject(projectData) {
     const body = JSON.stringify({
       stars: projectData.stars,
       forks: projectData.forks,
-      featured_date: projectData.featured_date
+      featured_date: projectData.featured_date,
+      language: projectData.language,
+      topics: projectData.topics,
+      category: projectData.category,
+      ai_summary: projectData.ai_summary,
+      why_trending: projectData.why_trending,
+      demo_url: projectData.demo_url,
     });
     
     const options = {
@@ -270,7 +344,7 @@ function updateProject(projectData) {
 // Main execution
 async function main() {
   try {
-    console.log('🚀 Fetching trending repositories...');
+    console.log(`🚀 Fetching trending repositories created after ${getSinceDate()}...`);
     const data = await fetchTrending();
     
     if (!data.items || data.items.length === 0) {
@@ -280,8 +354,10 @@ async function main() {
     
     console.log(`📦 Found ${data.items.length} repositories`);
     
+    await purgeProjectsForDate(TODAY);
     // Insert into Supabase
-    await insertProjects(data.items);
+    await insertProjects(data.items, TODAY);
+    await cleanupOldProjects(TODAY);
     
     console.log('✅ Daily fetch completed successfully!');
   } catch (error) {
